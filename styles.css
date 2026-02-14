@@ -31,3 +31,19 @@ li {
     border-radius: 10px;
     list-style: none;
 }
+
+.formGroup input:invalid {
+  border-color: #e74c3c; /* Light red for invalid built-in states */
+}
+
+.formGroup textarea:invalid {
+  border-color: #e74c3c; /* Light red for invalid built-in states */
+}
+
+.formGroup .errorSpan {
+  display: block;
+  color: #e74c3c; /* Red for error messages */
+  font-size: 0.9em;
+  margin-top: 5px;
+  min-height: 1em; /* Reserve space to prevent layout shifts */
+}
