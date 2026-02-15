@@ -11,7 +11,6 @@ let currentItemId = null;
 // localStorage.removeItem(key);
 // even listeners
 personalBlogForm.addEventListener("submit", formSubnit)
-buttonSend.addEventListener('click', updateItem)
 list.addEventListener("click", function (event) {
 
     if (event.target.closest(".editBtn")) {
@@ -39,38 +38,69 @@ saveContent()
 render()
 
 function formSubnit(event) {
-    event.preventDefault()
-    const post = {
-        id: id++,
-        title: titleInput.value.trim(),
-        content: contentInput.value.trim()
-    }
+    event.preventDefault();
 
-    if (title === "" | content === "") {
-        alert("Please fill out all the fields")
-        return
-    }
-
-    if (!title.validity.valid) {
-        title.setCustomValidity("Please enter the title");
-        titleSpan.textContent = title.validationMessage
-        title.focus()
-        return;
-    }
-    if (!content.validity.valid) {
-        content.setCustomValidity("Please enter a content")
-        contentSpan.textContent = content.validationMessage
-        content.focus()
+    if (!titleInput.validity.valid) {
+        titleInput.setCustomValidity("Please enter the title");
+        titleSpan.textContent = titleInput.validationMessage;
+        titleInput.focus();
         return;
     }
 
-    // add new post to the cart 
-    cart.push(post)
+    if (!contentInput.validity.valid) {
+        contentInput.setCustomValidity("Please enter content");
+        contentSpan.textContent = contentInput.validationMessage;
+        contentInput.focus();
+        return;
+    }
 
-    saveContent()
-    render()
-    clearInputs()
+    if (currentItemId !== null) {
+
+        // ✏️ EDIT MODE
+        cart = cart.map(post =>
+            post.id === currentItemId
+                ? {
+                    ...post,
+                    title: titleInput.value.trim(),
+                    content: contentInput.value.trim()
+                }
+                : post
+        );
+
+        currentItemId = null;
+        buttonSend.innerText = "Send";
+
+    } else {
+
+        // ➕ ADD MODE
+        const newPost = {
+            id: id++,
+            title: titleInput.value.trim(),
+            content: contentInput.value.trim(),
+            timestamp: new Date().toISOString()
+        };
+
+        cart.push(newPost);
+    }
+    // console.log("Form submitted");
+    saveContent();
+    render();
+    clearInputs();
 }
+
+contentInput.addEventListener("input", (event) => {
+    const Input = event.target;
+    if (Input.validity.typeMismatch) {
+        Input.setCustomValidity('Please enter a valid conten, minimum lenght it is 100 words');
+    } else if (Input.validity.valueMissing) {
+        Input.setCustomValidity('Field is required');
+    }
+    else {
+        Input.setCustomValidity(''); // Clear custom error if valid
+    }
+    // Display the custom message or clear it
+    contentSpan.textContent = contentInput.validationMessage;
+})
 
 function render() {
     list.innerHTML = "";
@@ -83,6 +113,7 @@ function render() {
             <p>ID: ${post.id}</p>
             <h3>Title: ${post.title}</h3>
             <p>Message: ${post.content}</p>
+            <p>timestamp: ${post.timestamp}</p>
             <button class="editBtn">Edit</button>
             <button class="deleteBtn">Delete</button>
         `;
@@ -109,7 +140,10 @@ function deleteItem(event) {
 
     //Re-render UI
     render();
+
 }
+
+
 
 function editItem(event) {
 
@@ -128,42 +162,6 @@ function editItem(event) {
     contentInput.value = item.content;
 
     buttonSend.innerText = "Save";
-
-    saveContent();
-    render();
-}
-
-function updateItem() {
-
-    if (currentItemId) {
-
-        // Update in cart array
-        cart = cart.map(post =>
-            post.id === currentItemId ? { ...post, title: titleInput.value, content: contentInput.value } : post
-        );
-
-        saveContent();
-        render();
-
-        currentItemId = null;
-        buttonSend.innerText = "Send";
-
-    } else {
-
-        // Create new item
-        const newItem = {
-            id: id++,
-            title: titleInput.value,
-            content: contentInput.value
-        };
-
-        cart.push(newItem);
-
-        saveContent();
-        render();
-    }
-
-    clearInputs();
 }
 
 function clearInputs() {
