@@ -11,8 +11,18 @@ let currentItemId = null;
 // localStorage.removeItem(key);
 // even listeners
 personalBlogForm.addEventListener("submit", formSubnit)
-list.addEventListener('click', editItem)
 buttonSend.addEventListener('click', updateItem)
+list.addEventListener("click", function (event) {
+
+    if (event.target.closest(".editBtn")) {
+        editItem(event);
+    }
+
+    if (event.target.closest(".deleteBtn")) {
+        deleteItem(event);
+    }
+
+});
 
 
 // state
@@ -63,43 +73,64 @@ function formSubnit(event) {
 }
 
 function render() {
-    list.innerHTML = ""
+    list.innerHTML = "";
 
     cart.forEach(post => {
-        const li = document.createElement("li")
-        const editButton = document.createElement("button")
-        const deleteButton = document.createElement("button")
-        deleteButton.innerHTML = "delete"
-        editButton.innerHTML = "edit"
+        const li = document.createElement("li");
         li.dataset.id = post.id;
+
         li.innerHTML = `
             <p>ID: ${post.id}</p>
             <h3>Title: ${post.title}</h3>
-            <p>Message: ${post.content}</p>`
+            <p>Message: ${post.content}</p>
+            <button class="editBtn">Edit</button>
+            <button class="deleteBtn">Delete</button>
+        `;
 
-        li.appendChild(editButton)
-        li.appendChild(deleteButton)
-        list.appendChild(li)
-        deleteButton.addEventListener('click', (e) => {
-            e.stopPropagation()
-            list.removeChild(e.target.parentElement)
-        })
-    })
+        list.appendChild(li);
+    });
+}
+
+function deleteItem(event) {
+
+    const deleteBtn = event.target.closest(".deleteBtn");
+    if (!deleteBtn) return;
+
+    const li = deleteBtn.closest("li");
+    if (!li) return;
+
+    const id = Number(li.dataset.id);
+
+    //Remove from array
+    cart = cart.filter(post => post.id !== id);
+
+    //Update localStorage
+    saveContent();
+
+    //Re-render UI
+    render();
 }
 
 function editItem(event) {
-    const li = event.target.closest('li');
 
-    if (li) {
-        currentItemId = Number(li.dataset.id);
+    const editBtn = event.target.closest(".editBtn");
+    if (!editBtn) return;
 
-        const item = cart.find(post => post.id === currentItemId);
+    const li = editBtn.closest("li");
+    if (!li) return;
 
-        titleInput.value = item.title;
-        contentInput.value = item.content;
+    currentItemId = Number(li.dataset.id);
 
-        buttonSend.innerText = "Save";
-    }
+    const item = cart.find(post => post.id === currentItemId);
+    if (!item) return;
+
+    titleInput.value = item.title;
+    contentInput.value = item.content;
+
+    buttonSend.innerText = "Save";
+
+    saveContent();
+    render();
 }
 
 function updateItem() {
@@ -123,13 +154,13 @@ function updateItem() {
         const newItem = {
             id: id++,
             title: titleInput.value,
-            description: contentInput.value
+            content: contentInput.value
         };
 
         cart.push(newItem);
 
-        saveToLocalStorage();
-        renderList();
+        saveContent();
+        render();
     }
 
     clearInputs();
