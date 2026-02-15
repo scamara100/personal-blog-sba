@@ -1,3 +1,4 @@
+// DOM Elements
 const personalBlogForm = document.getElementById("personalBlogForm")
 const titleInput = document.getElementById("title")
 const contentInput = document.getElementById("content")
@@ -34,12 +35,16 @@ if (cart.length > 0) {
     id = Math.max(...cart.map(post => post.id)) + 1; //This extracts only the IDs from the cart array
 }
 
+// Init and It prepares the application state on laod by presisting changes and rendering the list
 saveContent()
 render()
 
+
+// function for submit the form, add new post, and edit the post
 function formSubnit(event) {
     event.preventDefault();
 
+     // validity
     if (!titleInput.validity.valid) {
         titleInput.setCustomValidity("Please enter the title");
         titleSpan.textContent = titleInput.validationMessage;
@@ -54,6 +59,7 @@ function formSubnit(event) {
         return;
     }
 
+    // check if they are an edit post and edit it
     if (currentItemId !== null) {
 
         // ✏️ EDIT MODE
@@ -67,6 +73,7 @@ function formSubnit(event) {
                 : post
         );
 
+        // reset id and button send
         currentItemId = null;
         buttonSend.innerText = "Send";
 
@@ -88,6 +95,7 @@ function formSubnit(event) {
     clearInputs();
 }
 
+// check if input respect all the requirement
 contentInput.addEventListener("input", (event) => {
     const Input = event.target;
     if (Input.validity.typeMismatch) {
@@ -102,13 +110,15 @@ contentInput.addEventListener("input", (event) => {
     contentSpan.textContent = contentInput.validationMessage;
 })
 
+
+// display function
 function render() {
     list.innerHTML = "";
 
     cart.forEach(post => {
         const li = document.createElement("li");
         li.dataset.id = post.id;
-
+        // add dynamically HTML Elements on browser
         li.innerHTML = `
             <p>ID: ${post.id}</p>
             <h3>Title: ${post.title}</h3>
@@ -117,11 +127,13 @@ function render() {
             <button class="editBtn">Edit</button>
             <button class="deleteBtn">Delete</button>
         `;
-
+        // add li in the list
         list.appendChild(li);
     });
 }
 
+
+// function deleteItem
 function deleteItem(event) {
 
     const deleteBtn = event.target.closest(".deleteBtn");
@@ -144,7 +156,7 @@ function deleteItem(event) {
 }
 
 
-
+// function editItem
 function editItem(event) {
 
     const editBtn = event.target.closest(".editBtn");
@@ -153,6 +165,7 @@ function editItem(event) {
     const li = editBtn.closest("li");
     if (!li) return;
 
+    // add target elemt id into currentItemId
     currentItemId = Number(li.dataset.id);
 
     const item = cart.find(post => post.id === currentItemId);
@@ -164,6 +177,7 @@ function editItem(event) {
     buttonSend.innerText = "Save";
 }
 
+// cleaner
 function clearInputs() {
     titleInput.value = ""
     contentInput.value = ""
